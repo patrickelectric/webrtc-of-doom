@@ -13,7 +13,26 @@
   <head>
     <meta charset="utf-8"/>
     <style>
+      body {
+        display: contents;
+      }
       .error { color: red; }
+
+      #wrapper {
+        min-height: 100%;
+        position: absolute;
+        z-index: -1;
+        width: 100%;
+      }
+
+      #stream {
+        height: 100%;
+        width: 100%;
+      }
+
+      #status {
+        color: white;
+      }
     </style>
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="webrtc.js"></script>
@@ -23,14 +42,9 @@
   </head>
 
   <body>
-    <div><video id="stream" autoplay playsinline>Your browser doesn't support video</video></div>
+    <div id="wrapper"><video id="stream" autoplay playsinline>Your browser doesn't support video</video></div>
     <div>Status: <span id="status">unknown</span></div>
-    <div><textarea id="text" cols=40 rows=4></textarea></div>
     <div>Our id is <b id="peer-id">unknown</b></div>
-    <br/>
-    <div>
-      <div>getUserMedia constraints being used:</div>
-      <div><textarea id="constraints" cols=40 rows=4></textarea></div>
-    </div>
+
   </body>
 </html>
