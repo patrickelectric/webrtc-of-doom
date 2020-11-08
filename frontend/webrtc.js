@@ -15,7 +15,7 @@ var default_peer_id;
 // Override with your own STUN servers if you want
 var rtc_configuration = {iceServers: []};
 // The default constraints that will be attempted. Can be overriden by the user.
-var default_constraints = {video: false, audio: true};
+var default_constraints = {video: false, audio: false};
 
 var connect_attempts = 0;
 var peer_connection;
