@@ -13,10 +13,9 @@ var ws_port;
 // Set this to use a specific peer id instead of a random one
 var default_peer_id;
 // Override with your own STUN servers if you want
-var rtc_configuration = {iceServers: [{urls: "stun:stun.services.mozilla.com"},
-                                      {urls: "stun:stun.l.google.com:19302"}]};
+var rtc_configuration = {iceServers: []};
 // The default constraints that will be attempted. Can be overriden by the user.
-var default_constraints = {video: true, audio: true};
+var default_constraints = {video: false, audio: true};
 
 var connect_attempts = 0;
 var peer_connection;
@@ -26,7 +25,7 @@ var ws_conn;
 var local_stream_promise;
 
 function getOurId() {
-    return Math.floor(Math.random() * (9000 - 10) + 10).toString();
+    return 42;
 }
 
 function resetState() {
@@ -173,20 +172,9 @@ function onServerError(event) {
 }
 
 function getLocalStream() {
-    var constraints;
-    var textarea = document.getElementById('constraints');
-    try {
-        constraints = JSON.parse(textarea.value);
-    } catch (e) {
-        console.error(e);
-        setError('ERROR parsing constraints: ' + e.message + ', using default constraints');
-        constraints = default_constraints;
-    }
-    console.log(JSON.stringify(constraints));
-
     // Add local stream
     if (navigator.mediaDevices.getUserMedia) {
-        return navigator.mediaDevices.getUserMedia(constraints);
+        return navigator.mediaDevices.getUserMedia(default_constraints);
     } else {
         errorUserMediaHandler();
     }
@@ -202,10 +190,7 @@ function websocketServerConnect() {
     var span = document.getElementById("status");
     span.classList.remove('error');
     span.textContent = '';
-    // Populate constraints
-    var textarea = document.getElementById('constraints');
-    if (textarea.value == '')
-        textarea.value = JSON.stringify(default_constraints);
+
     // Fetch the peer id to use
     peer_id = default_peer_id || getOurId();
     ws_port = ws_port || '8443';
