@@ -13,26 +13,19 @@
   <head>
     <meta charset="utf-8"/>
     <style>
-      body {
-        display: contents;
-      }
       .error { color: red; }
 
-      #wrapper {
-        min-height: 100%;
-        position: absolute;
-        z-index: -1;
-        width: 100%;
-      }
-
-      #stream {
+      body {
         height: 100%;
         width: 100%;
       }
 
-      #status {
-        color: white;
+      #stream {
+        height: 33%;
+        width: 33%;
+        background-size: cover;
       }
+
     </style>
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="webrtc.js"></script>
@@ -42,9 +35,11 @@
   </head>
 
   <body>
-    <div id="wrapper"><video id="stream" autoplay playsinline>Your browser doesn't support video</video></div>
+    <div style="flex-direction: column;">
     <div>Status: <span id="status">unknown</span></div>
     <div>Our id is <b id="peer-id">unknown</b></div>
+    <video id="stream" autoplay playsinline>Your browser doesn't support video</video>
+    </div>
 
   </body>
 </html>
