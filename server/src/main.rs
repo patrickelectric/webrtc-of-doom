@@ -112,7 +112,9 @@ impl App {
     > {
         // Create the GStreamer pipeline
         let pipeline = gst::parse_launch(
-        "videotestsrc pattern=ball is-live=true ! vp8enc deadline=1 ! rtpvp8pay pt=96 ! webrtcbin. \
+        "videotestsrc pattern=ball ! video/x-raw,width=640,height=480 ! \
+         videoconvert ! x264enc bitrate=5000 ! video/x-h264, profile=baseline ! \
+         rtph264pay! webrtcbin. \
          audiotestsrc is-live=true ! opusenc ! rtpopuspay pt=97 ! webrtcbin. \
          webrtcbin name=webrtcbin"
     )?;
@@ -602,7 +604,7 @@ fn check_plugins() -> Result<(), anyhow::Error> {
         "audioconvert",
         "autodetect",
         "opus",
-        "vpx",
+        "x264",
         "webrtc",
         "nice",
         "dtls",
