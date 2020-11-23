@@ -14,15 +14,11 @@ var ws_port;
 var default_peer_id;
 // Override with your own STUN servers if you want
 var rtc_configuration = {iceServers: []};
-// The default constraints that will be attempted. Can be overriden by the user.
-var default_constraints = {video: false, audio: false};
 
 var connect_attempts = 0;
 var peer_connection;
 var send_channel;
 var ws_conn;
-// Promise for local stream after constraints are approved by the user
-var local_stream_promise;
 
 function getOurId() {
     return 42;
@@ -58,14 +54,6 @@ function setError(text) {
 }
 
 function resetVideo() {
-    // Release the webcam and mic
-    if (local_stream_promise)
-        local_stream_promise.then(stream => {
-            if (stream) {
-                stream.getTracks().forEach(function (track) { track.stop(); });
-            }
-        });
-
     // Reset the video element and stop showing the last received frame
     var videoElement = getVideoElement();
     videoElement.pause();
@@ -80,11 +68,8 @@ function onIncomingSDP(sdp) {
         if (sdp.type != "offer")
             return;
         setStatus("Got SDP offer");
-        local_stream_promise.then((stream) => {
-            setStatus("Got local stream, creating answer");
-            peer_connection.createAnswer()
+        peer_connection.createAnswer()
             .then(onLocalDescription).catch(setError);
-        }).catch(setError);
     }).catch(setError);
 }
 
@@ -96,10 +81,6 @@ function onLocalDescription(desc) {
         sdp = {'sdp': peer_connection.localDescription}
         ws_conn.send(JSON.stringify(sdp));
     });
-}
-
-function generateOffer() {
-    peer_connection.createOffer().then(onLocalDescription).catch(setError);
 }
 
 // ICE candidate received from peer, add it to the peer connection
@@ -122,7 +103,7 @@ function onServerMessage(event) {
 	    if (event.data.startsWith("OFFER_REQUEST")) {
 	      // The peer wants us to set up and then send an offer
               if (!peer_connection)
-                  createCall(null).then (generateOffer);
+                  createCall(null)
 	    }
             else {
                 // Handle incoming JSON SDP and ICE messages
@@ -169,15 +150,6 @@ function onServerError(event) {
     setError("Unable to connect to server, did you add an exception for the certificate?")
     // Retry after 3 seconds
     window.setTimeout(websocketServerConnect, 3000);
-}
-
-function getLocalStream() {
-    // Add local stream
-    if (navigator.mediaDevices.getUserMedia) {
-        return navigator.mediaDevices.getUserMedia(default_constraints);
-    } else {
-        errorUserMediaHandler();
-    }
 }
 
 function websocketServerConnect() {
@@ -276,11 +248,6 @@ function createCall(msg) {
     peer_connection.ondatachannel = onDataChannel;
     peer_connection.ontrack = onRemoteTrack;
     /* Send our video/audio to the other peer */
-    local_stream_promise = getLocalStream().then((stream) => {
-        console.log('Adding local stream');
-        peer_connection.addStream(stream);
-        return stream;
-    }).catch(setError);
 
     if (msg != null && !msg.sdp) {
         console.log("WARNING: First message wasn't an SDP message!?");
@@ -298,6 +265,4 @@ function createCall(msg) {
 
     if (msg != null)
         setStatus("Created peer connection for call, waiting for SDP");
-
-    return local_stream_promise;
 }
